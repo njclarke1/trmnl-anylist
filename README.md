@@ -9,6 +9,22 @@ Display your [AnyList](https://www.anylist.com/) shopping list on a [TRMNL](http
 
 ---
 
+## Screenshots
+
+**Typical weekly shop** — items grouped by category across three columns:
+
+![Typical shop render](assets/demo/render-normal.png)
+
+**Large shop** — when categories exceed the screen, a count of hidden categories appears bottom-right:
+
+![Overflow render](assets/demo/render-overflow.png)
+
+**Empty list** — shown when all items are checked off:
+
+![Empty list render](assets/demo/render-empty.png)
+
+---
+
 ## Architecture
 
 ```
@@ -74,14 +90,13 @@ curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:3457/api/v1/list
 
 ### Option B — Portainer stack on NAS
 
-Because Portainer cannot reference host paths in `build:`, build the image manually over SSH first:
+Build the image manually over SSH first:
 
 ```bash
-# On the NAS
 docker build -t trmnl-anylist-api:latest /path/to/trmnl-anylist/api
 ```
 
-Then deploy a Portainer stack with this compose (paste into the editor):
+Then deploy a Portainer stack with this compose (paste into the editor, set env vars in Portainer's environment editor):
 
 ```yaml
 services:
@@ -98,7 +113,7 @@ services:
       - ANYLIST_LIST_NAME=Groceries
 ```
 
-> **Security:** Set env vars in Portainer's stack environment editor, not in a YAML file you commit anywhere.
+> **Security:** Set env vars in Portainer's stack environment editor. Never put credentials in a YAML file you commit anywhere.
 
 ---
 
@@ -111,23 +126,21 @@ Create a polling plugin via the LaraPaper UI:
 | Field | Value |
 |---|---|
 | Strategy | Polling |
-| Polling URL | `http://192.168.68.111:3457/api/v1/list?name=Groceries` |
+| Polling URL | `http://192.168.68.111:3457/api/v1/list` |
 | Polling Headers | `authorization: Bearer YOUR_TOKEN` |
 | Refresh interval | 900s |
 
-Then paste the contents of `recipe/src/full.liquid` into the Markup editor. Repeat for other layouts.
+Paste the contents of `recipe/src/full.liquid` into the Markup editor.
 
 ### Cloud TRMNL
 
-1. Create a Private Plugin → set the polling URL and header as above
-2. Import the recipe zip (Plugins → Import) to load all layouts at once
-3. Optionally, click **Publish as Recipe** to share with the community
+1. Create a Private Plugin and set the polling URL and header as above
+2. Optionally click **Publish as Recipe** to share with the community
 
 ### trmnlp (local dev / push)
 
 ```bash
 cd recipe
-# Set your API key and token in the environment
 export TRMNL_API_KEY=your-trmnl-api-key
 export API_TOKEN=your-sidecar-token
 
@@ -159,14 +172,8 @@ Requires `Authorization: Bearer <token>` header.
     {
       "name": "Dairy",
       "items": [
-        { "name": "Milk", "quantity": "2", "details": "" },
-        { "name": "Butter", "quantity": "250g", "details": "" }
-      ]
-    },
-    {
-      "name": "Other",
-      "items": [
-        { "name": "Bin bags", "quantity": "", "details": "" }
+        { "name": "Milk", "quantity": "2 L", "details": "" },
+        { "name": "Butter", "quantity": "250 g", "details": "" }
       ]
     }
   ],
@@ -175,14 +182,15 @@ Requires `Authorization: Bearer <token>` header.
 ```
 
 - Checked items are always excluded.
-- Categories are sorted alphabetically; `Other` sorts last.
-- `details` maps to the AnyList item note field.
+- Categories sorted alphabetically; `Other` sorts last.
+- The `?name=` query param is optional — defaults to `ANYLIST_LIST_NAME` env var.
+- List names with spaces must be quoted in `.env`: `ANYLIST_LIST_NAME="My Shopping List"`
 
 ---
 
 ## Configuration
 
-| Environment variable | Required | Default | Description |
+| Variable | Required | Default | Description |
 |---|---|---|---|
 | `ANYLIST_EMAIL` | Yes | — | AnyList account email |
 | `ANYLIST_PASSWORD` | Yes | — | AnyList account password |
@@ -198,7 +206,7 @@ Requires `Authorization: Bearer <token>` header.
 - The API token prevents anyone on your LAN from reading your shopping list.
 - AnyList credentials are never exposed via the API — they stay server-side.
 - The sidecar runs as a non-root user inside the container.
-- Do not expose port 3457 to the internet. This is designed for LAN / VPN access only.
+- Do not expose port 3457 to the internet. Designed for LAN / Tailscale access only.
 
 ---
 
