@@ -42,11 +42,16 @@ async function login () {
  * Tries multiple field names used by different anylist package versions.
  */
 function resolveCategory (item) {
-  if (item.categoryDetails && item.categoryDetails.name) return item.categoryDetails.name;
-  if (item.listCategory && item.listCategory.name) return item.listCategory.name;
-  if (typeof item.category === 'string' && item.category) return item.category;
-  if (item.category && item.category.name) return item.category.name;
-  return 'Other';
+  const id = item.categoryMatchId;
+  if (!id) return 'Other';
+  const conjunctions = ['and', 'or', 'of', 'the', 'in', 'a', 'an'];
+  return id
+    .split('-')
+    .map((word, i) => {
+      if (i > 0 && conjunctions.includes(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
 }
 
 /**
