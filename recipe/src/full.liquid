@@ -1,0 +1,57 @@
+<div class="layout">
+
+  {% if item_count == 0 %}
+
+  <div style="display:flex;align-items:center;justify-content:center;height:80%;">
+    <p class="title" data-pixel-perfect="true">Nothing on the list!</p>
+  </div>
+
+  {% else %}
+
+  {% comment %} Split categories across two columns {% endcomment %}
+  {% assign col_split = categories.size | divided_by: 2 | ceil %}
+
+  <div style="display:flex;gap:16px;height:100%;">
+
+    <div style="flex:1;min-width:0;" data-list-limit="true" data-list-max-height="390">
+      {% for category in categories limit: col_split %}
+      <div style="margin-bottom:8px;">
+        <p class="label" data-pixel-perfect="true" style="text-transform:uppercase;">{{ category.name }}</p>
+        {% for item in category.items %}
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">{{ item.name }}{% if item.details != "" %} <span class="label">({{ item.details }})</span>{% endif %}</span>
+          {% if item.quantity != "" %}<span class="label" style="white-space:nowrap;padding-left:6px;" data-pixel-perfect="true">{{ item.quantity }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div style="width:1px;background:#e0e0e0;"></div>
+
+    <div style="flex:1;min-width:0;" data-list-limit="true" data-list-max-height="390">
+      {% for category in categories offset: col_split %}
+      <div style="margin-bottom:8px;">
+        <p class="label" data-pixel-perfect="true" style="text-transform:uppercase;">{{ category.name }}</p>
+        {% for item in category.items %}
+        <div style="display:flex;justify-content:space-between;align-items:baseline;">
+          <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">{{ item.name }}{% if item.details != "" %} <span class="label">({{ item.details }})</span>{% endif %}</span>
+          {% if item.quantity != "" %}<span class="label" style="white-space:nowrap;padding-left:6px;" data-pixel-perfect="true">{{ item.quantity }}</span>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  {% endif %}
+
+  <div class="title_bar">
+    <img class="image" src="/images/icons/shopping-cart.svg" />
+    <span class="title">AnyList</span>
+    <span class="instance">{{ list_name }}</span>
+    <span class="status">{{ item_count }} item{% if item_count != 1 %}s{% endif %}</span>
+  </div>
+
+</div>

@@ -1,0 +1,30 @@
+<div class="layout">
+
+  {% if item_count == 0 %}
+  <p class="label" data-pixel-perfect="true">Nothing on the list!</p>
+  {% else %}
+
+  <div data-list-limit="true" data-list-max-height="370">
+    {% for category in categories %}
+    <div style="margin-bottom:6px;">
+      <p class="label" data-pixel-perfect="true" style="text-transform:uppercase;">{{ category.name }}</p>
+      {% for item in category.items %}
+      <div style="display:flex;justify-content:space-between;align-items:baseline;">
+        <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">{{ item.name }}</span>
+        {% if item.quantity != "" %}<span class="label" style="white-space:nowrap;padding-left:4px;" data-pixel-perfect="true">{{ item.quantity }}</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+
+  <div class="title_bar">
+    <img class="image" src="/images/icons/shopping-cart.svg" />
+    <span class="title">AnyList</span>
+    <span class="instance">{{ list_name }}</span>
+    <span class="status">{{ item_count }} items</span>
+  </div>
+
+</div>

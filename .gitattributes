@@ -1,0 +1,7 @@
+# Normalise all text files to LF on commit (avoids Windows CRLF creeping in)
+* text=auto eol=lf
+
+# Explicitly binary
+*.png binary
+*.jpg binary
+*.svg binary

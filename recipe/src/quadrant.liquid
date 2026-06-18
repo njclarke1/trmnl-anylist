@@ -1,0 +1,14 @@
+<div class="layout">
+
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:80%;gap:4px;">
+    <p class="value" data-pixel-perfect="true" style="font-size:48px;line-height:1;">{{ item_count }}</p>
+    <p class="label" data-pixel-perfect="true">item{% if item_count != 1 %}s{% endif %} to buy</p>
+  </div>
+
+  <div class="title_bar">
+    <img class="image" src="/images/icons/shopping-cart.svg" />
+    <span class="title">AnyList</span>
+    <span class="instance">{{ list_name }}</span>
+  </div>
+
+</div>

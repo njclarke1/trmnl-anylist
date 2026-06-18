@@ -1,0 +1,31 @@
+# ── Secrets — NEVER commit these ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+!api/.env.example
+
+# ── Node ─────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ── Runtime data ──────────────────────────────────────────────────────────────
+data/
+
+# ── trmnlp local config (contains API key reference) ─────────────────────────
+# .trmnlp.yml is safe to commit — it only references env vars, not values.
+# Uncomment the line below if you'd prefer not to share your local config.
+# recipe/.trmnlp.yml
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Editor ───────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

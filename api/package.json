@@ -1,0 +1,18 @@
+{
+  "name": "trmnl-anylist-api",
+  "version": "1.0.0",
+  "description": "Sidecar API bridge — exposes AnyList shopping lists as JSON for the TRMNL e-ink recipe",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "anylist": "^0.8.6",
+    "express": "^4.21.2"
+  }
+}

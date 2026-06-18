@@ -1,0 +1,27 @@
+{% comment %}
+  shared.liquid — reusable partials for trmnl-anylist
+  Rendered via {% render 'shared' %} in layout files.
+{% endcomment %}
+
+{% comment %}
+  category_block: renders a category heading + its items.
+  Usage: {% render 'shared', category: cat_object, show_qty: true %}
+{% endcomment %}
+
+<div class="category-block">
+  <p class="label" style="text-transform:uppercase;margin-bottom:2px;" data-pixel-perfect="true">
+    {{ category.name }}
+  </p>
+  {% for item in category.items %}
+  <div style="display:flex;justify-content:space-between;align-items:baseline;">
+    <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">
+      {{ item.name }}{% if item.details and item.details != "" %} <span class="label">({{ item.details }})</span>{% endif %}
+    </span>
+    {% if item.quantity and item.quantity != "" %}
+    <span class="label" data-pixel-perfect="true" style="white-space:nowrap;padding-left:6px;">
+      {{ item.quantity }}
+    </span>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>

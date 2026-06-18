@@ -1,0 +1,23 @@
+services:
+  trmnl-anylist-api:
+    build:
+      context: ./api
+    image: trmnl-anylist-api:latest
+    container_name: trmnl-anylist-api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3457}:3457"
+    environment:
+      - ANYLIST_EMAIL=${ANYLIST_EMAIL}
+      - ANYLIST_PASSWORD=${ANYLIST_PASSWORD}
+      - API_TOKEN=${API_TOKEN}
+      - ANYLIST_LIST_NAME=${ANYLIST_LIST_NAME:-Groceries}
+    # 'data' volume reserved for future token persistence / caching
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3457/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

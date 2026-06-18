@@ -1,0 +1,15 @@
+---
+# Local dev config for trmnlp serve.
+# api_token is read from $API_TOKEN so you never have to hardcode it here.
+# Run: API_TOKEN=your-token trmnlp serve  (or set it in your shell profile)
+
+watch:
+  - src
+  - .trmnlp.yml
+
+custom_fields:
+  api_url: "http://localhost:3457"
+  list_name: "Groceries"
+  api_token: "{{ env.API_TOKEN }}"
+
+time_zone: Europe/London
