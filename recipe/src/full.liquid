@@ -1,57 +1,67 @@
-<div class="layout">
+<style>
+.sl{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#fff;color:#000;height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.sl-hdr{display:flex;align-items:flex-end;justify-content:space-between;padding:16px 20px 10px;border-bottom:3px solid #000}
+.sl-hl{display:flex;align-items:baseline;gap:12px}
+.sl-title{font-size:38px;font-weight:800;margin:0}
+.sl-count{font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.1em}
+.sl-date{font-size:17px}
+.sl-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px;padding:14px 20px;overflow:hidden;align-content:start}
+.sl-cat{margin-bottom:14px}
+.sl-cat-name{font-size:17px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid #000;padding-bottom:3px;margin:0 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sl-item{display:flex;justify-content:space-between;font-size:19px;line-height:1.5}
+.sl-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.sl-qty{font-size:16px;font-weight:500;margin-left:6px;white-space:nowrap}
+.sl-more{display:none;position:absolute;bottom:8px;right:20px;font-size:15px;color:#666;font-style:italic}
+.sl-empty{display:flex;align-items:center;justify-content:center;flex:1}
+.sl-empty-msg{font-size:32px;font-weight:700;color:#aaa}
+</style>
 
+<div class="sl">
+  <div class="sl-hdr">
+    <div class="sl-hl">
+      <h1 class="sl-title">{{ list_name }}</h1>
+      <span class="sl-count">{{ item_count }} items</span>
+    </div>
+    <span class="sl-date">{{ 'now' | date: '%A %-d %B' }}</span>
+  </div>
   {% if item_count == 0 %}
-
-  <div style="display:flex;align-items:center;justify-content:center;height:80%;">
-    <p class="title" data-pixel-perfect="true">Nothing on the list!</p>
+  <div class="sl-empty">
+    <span class="sl-empty-msg">Nothing on the list!</span>
   </div>
-
   {% else %}
-
-  {% comment %} Split categories across two columns {% endcomment %}
-  {% assign col_split = categories.size | divided_by: 2 | ceil %}
-
-  <div style="display:flex;gap:16px;height:100%;">
-
-    <div style="flex:1;min-width:0;" data-list-limit="true" data-list-max-height="390">
-      {% for category in categories limit: col_split %}
-      <div style="margin-bottom:8px;">
-        <p class="label" data-pixel-perfect="true" style="text-transform:uppercase;">{{ category.name }}</p>
-        {% for item in category.items %}
-        <div style="display:flex;justify-content:space-between;align-items:baseline;">
-          <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">{{ item.name }}{% if item.details != "" %} <span class="label">({{ item.details }})</span>{% endif %}</span>
-          {% if item.quantity != "" %}<span class="label" style="white-space:nowrap;padding-left:6px;" data-pixel-perfect="true">{{ item.quantity }}</span>{% endif %}
-        </div>
-        {% endfor %}
+  <div class="sl-grid">
+    {% for category in categories %}
+    <div class="sl-cat">
+      <p class="sl-cat-name">{{ category.emoji }} {{ category.name }}</p>
+      {% for item in category.items %}
+      <div class="sl-item">
+        <span class="sl-name">{{ item.name }}</span>
+        {% if item.quantity %}<span class="sl-qty">{{ item.quantity }}</span>{% endif %}
       </div>
       {% endfor %}
     </div>
-
-    <div style="width:1px;background:#e0e0e0;"></div>
-
-    <div style="flex:1;min-width:0;" data-list-limit="true" data-list-max-height="390">
-      {% for category in categories offset: col_split %}
-      <div style="margin-bottom:8px;">
-        <p class="label" data-pixel-perfect="true" style="text-transform:uppercase;">{{ category.name }}</p>
-        {% for item in category.items %}
-        <div style="display:flex;justify-content:space-between;align-items:baseline;">
-          <span class="clamp--1" data-pixel-perfect="true" style="flex:1;min-width:0;">{{ item.name }}{% if item.details != "" %} <span class="label">({{ item.details }})</span>{% endif %}</span>
-          {% if item.quantity != "" %}<span class="label" style="white-space:nowrap;padding-left:6px;" data-pixel-perfect="true">{{ item.quantity }}</span>{% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-
+    {% endfor %}
   </div>
-
   {% endif %}
-
-  <div class="title_bar">
-    <img class="image" src="/images/icons/shopping-cart.svg" />
-    <span class="title">AnyList</span>
-    <span class="instance">{{ list_name }}</span>
-    <span class="status">{{ item_count }} item{% if item_count != 1 %}s{% endif %}</span>
-  </div>
-
+  <span class="sl-more"></span>
 </div>
+
+<script>
+window.addEventListener('load', function() {
+  var grid = document.querySelector('.sl-grid');
+  var more = document.querySelector('.sl-more');
+  if (!grid || !more) return;
+  var limit = grid.getBoundingClientRect().bottom - 30;
+  var hidden = 0;
+  [].forEach.call(grid.querySelectorAll('.sl-cat'), function(cat) {
+    if (cat.getBoundingClientRect().top >= limit) {
+      cat.style.display = 'none';
+      hidden++;
+    }
+  });
+  if (hidden > 0) {
+    more.style.display = 'block';
+    more.textContent = '+ ' + hidden + ' more ' + (hidden === 1 ? 'category' : 'categories');
+  }
+});
+</script>

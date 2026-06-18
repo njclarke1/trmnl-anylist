@@ -126,7 +126,7 @@ Create a polling plugin via the LaraPaper UI:
 | Field | Value |
 |---|---|
 | Strategy | Polling |
-| Polling URL | `http://192.168.68.111:3457/api/v1/list` |
+| Polling URL | `http://YOUR_NAS_IP:3457/api/v1/list` |
 | Polling Headers | `authorization: Bearer YOUR_TOKEN` |
 | Refresh interval | 900s |
 

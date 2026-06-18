@@ -4,7 +4,63 @@ const AnyList = require('anylist');
 
 let instance = null;
 let loggedIn = false;
-let loginInProgress = null; // Prevents concurrent login attempts
+let loginInProgress = null;
+
+/**
+ * Maps AnyList categoryMatchId values to display emoji.
+ * Unknown / custom categories fall back to DEFAULT_EMOJI.
+ */
+const DEFAULT_EMOJI = '🛒';
+const CATEGORY_EMOJI = {
+  'produce':                              '🥦',
+  'dairy':                                '🥛',
+  'meat-seafood':                         '🥩',
+  'bakery-bread':                         '🍞',
+  'beverages':                            '☕',
+  'soups-and-canned-goods':               '🥫',
+  'condiments-oils-and-salad-dressings':  '🫙',
+  'cooking-and-baking':                   '🧑‍🍳',
+  'health-and-personal-care':             '💊',
+  'household':                            '🏠',
+  'home':                                 '🏠',
+  'frozen-foods':                         '🧊',
+  'snacks':                               '🍿',
+  'breakfast-foods':                      '🥐',
+  'garden':                               '🌱',
+  'pet-supplies':                         '🐾',
+  'wine-spirits':                         '🍷',
+  'baby':                                 '👶',
+  'deli':                                 '🧀',
+  'seafood':                              '🐟',
+  'floral':                               '💐',
+  'international-foods':                  '🌍',
+  'organic':                              '🌿',
+};
+
+/**
+ * Returns the categoryMatchId for an item, with fallbacks for older package versions.
+ */
+function getCategoryId (item) {
+  if (item.categoryMatchId) return item.categoryMatchId;
+  if (item.categoryDetails && item.categoryDetails.id) return item.categoryDetails.id;
+  return null;
+}
+
+/**
+ * Formats a hyphenated category ID into a title-case display name.
+ * e.g. "soups-and-canned-goods" -> "Soups and Canned Goods"
+ */
+function formatCategoryName (id) {
+  if (!id) return 'Other';
+  const conjunctions = ['and', 'or', 'of', 'the', 'in', 'a', 'an'];
+  return id
+    .split('-')
+    .map((word, i) => {
+      if (i > 0 && conjunctions.includes(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(' ');
+}
 
 function validateConfig () {
   const email = process.env.ANYLIST_EMAIL;
@@ -17,7 +73,6 @@ function validateConfig () {
 
 async function doLogin () {
   const { email, password } = validateConfig();
-  // Tear down existing instance cleanly before replacing it
   if (instance) {
     try { instance.teardown(); } catch (_) {}
   }
@@ -27,37 +82,12 @@ async function doLogin () {
   console.log('[anylist] Authenticated successfully');
 }
 
-/**
- * Calls doLogin() but serialises concurrent callers so only one login
- * attempt runs at a time (e.g. if several requests arrive during startup).
- */
 async function login () {
   if (loginInProgress) return loginInProgress;
   loginInProgress = doLogin().finally(() => { loginInProgress = null; });
   return loginInProgress;
 }
 
-/**
- * Returns the name of the category for an item.
- * Tries multiple field names used by different anylist package versions.
- */
-function resolveCategory (item) {
-  const id = item.categoryMatchId;
-  if (!id) return 'Other';
-  const conjunctions = ['and', 'or', 'of', 'the', 'in', 'a', 'an'];
-  return id
-    .split('-')
-    .map((word, i) => {
-      if (i > 0 && conjunctions.includes(word)) return word;
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(' ');
-}
-
-/**
- * Fetches a named list, returning the normalised JSON the API route will send.
- * On any error that looks like an auth failure, attempts one silent re-login.
- */
 async function fetchList (listName) {
   if (!loggedIn) await login();
 
@@ -86,14 +116,13 @@ async function fetchList (listName) {
 
   if (!rawList) return null;
 
-  // Filter out checked items, then group by category
   const unchecked = (rawList.items || []).filter(item => !item.checked);
 
   const categoryMap = new Map();
   for (const item of unchecked) {
-    const categoryName = resolveCategory(item);
-    if (!categoryMap.has(categoryName)) categoryMap.set(categoryName, []);
-    categoryMap.get(categoryName).push({
+    const id = getCategoryId(item) || 'other';
+    if (!categoryMap.has(id)) categoryMap.set(id, []);
+    categoryMap.get(id).push({
       name: item.name || '',
       quantity: item.quantity || '',
       details: item.note || ''
@@ -101,9 +130,12 @@ async function fetchList (listName) {
   }
 
   const categories = Array.from(categoryMap.entries())
-    .map(([name, items]) => ({ name, items }))
+    .map(([id, items]) => ({
+      name: formatCategoryName(id),
+      emoji: CATEGORY_EMOJI[id] || DEFAULT_EMOJI,
+      items
+    }))
     .sort((a, b) => {
-      // Push "Other" to the end; everything else alphabetical
       if (a.name === 'Other') return 1;
       if (b.name === 'Other') return -1;
       return a.name.localeCompare(b.name);
